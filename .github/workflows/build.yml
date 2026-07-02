@@ -1,0 +1,129 @@
+name: Flutter Multi Platform Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.2
+          cache: true
+
+      - name: Install packages
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  windows:
+    name: Windows EXE
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.2
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter build windows
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Build
+          path: build/windows/x64/runner/Release
+
+  linux:
+    name: Linux Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.2
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgtk-3-dev
+
+      - run: flutter build linux
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Linux-Build
+          path: build/linux/x64/release/bundle
+
+  macos:
+    name: macOS Build
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.2
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter build macos
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS-Build
+          path: build/macos/Build/Products/Release
+
+  web:
+    name: Web Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.2
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter build web
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Web-Build
+          path: build/web
